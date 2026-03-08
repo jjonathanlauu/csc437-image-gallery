@@ -1,14 +1,39 @@
-import { useState } from "react";
-import { MainLayout } from "../MainLayout.jsx";
-import { fetchAll } from "./ImageFetcher.js";
+import { useState, useEffect } from "react";
 import { ImageGrid } from "./ImageGrid.jsx";
 
 export function AllImages() {
-    const [imageData, _setImageData] = useState(fetchAll);
-    return (
-        <MainLayout>
-            <h2>All Images</h2>
-            <ImageGrid images={imageData} />
-        </MainLayout>
-    );
+  const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function fetchImages() {
+      try {
+        const response = await fetch("/api/images");
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        setImages(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchImages();
+  }, []);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
+
+  return (
+    <>
+      <h2>All Images</h2>
+      <ImageGrid images={images} />
+    </>
+  );
 }
