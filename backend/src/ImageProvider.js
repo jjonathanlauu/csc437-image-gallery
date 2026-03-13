@@ -31,6 +31,8 @@ export class ImageProvider {
   }
 
   async getOneImage(imageId) {
+    const usersCollection = getEnvVar("USERS_COLLECTION_NAME");
+
     const pipeline = [];
 
     pipeline.push({
@@ -41,7 +43,7 @@ export class ImageProvider {
 
     pipeline.push({
       $lookup: {
-        from: "users",
+        from: usersCollection,
         localField: "authorId",
         foreignField: "username",
         as: "author",
@@ -56,6 +58,17 @@ export class ImageProvider {
 
     return results[0];
   }
+
+  async createImage({ src, name, authorId }) {
+    const result = await this.collection.insertOne({
+      src,
+      name,
+      authorId,
+    });
+
+    return result.insertedId.toString();
+  }
+
   async updateImageName(imageId, newName) {
     const result = await this.collection.updateOne(
       { _id: new ObjectId(imageId) },

@@ -1,12 +1,11 @@
 import { useState } from "react";
 
-type Props = {
-  imageId: string;
-  initialValue: string;
-  onRename: (newName: string) => void;
-};
-
-export function ImageNameEditor({ imageId, initialValue, onRename }: Props) {
+export function ImageNameEditor({
+  imageId,
+  initialValue,
+  authToken,
+  onRename,
+}) {
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(initialValue || "");
   const [loading, setLoading] = useState(false);
@@ -26,6 +25,7 @@ export function ImageNameEditor({ imageId, initialValue, onRename }: Props) {
       const res = await fetch(`/api/images/${imageId}`, {
         method: "PATCH",
         headers: {
+          Authorization: `Bearer ${authToken}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -35,14 +35,13 @@ export function ImageNameEditor({ imageId, initialValue, onRename }: Props) {
 
       if (!res.ok) {
         const text = await res.text();
-        throw new Error(text);
+        throw new Error(text || "Rename failed");
       }
 
       onRename(nameInput);
-
       setIsEditingName(false);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -68,7 +67,9 @@ export function ImageNameEditor({ imageId, initialValue, onRename }: Props) {
           Submit
         </button>
 
-        <button onClick={() => setIsEditingName(false)}>Cancel</button>
+        <button disabled={loading} onClick={() => setIsEditingName(false)}>
+          Cancel
+        </button>
 
         <div aria-live="polite">
           {loading && <p>Renaming image...</p>}

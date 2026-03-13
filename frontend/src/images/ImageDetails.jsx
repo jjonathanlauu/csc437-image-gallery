@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
-import { ImageNameEditor } from "./ImageNameEditor";
+import { useParams } from "react-router-dom";
+import { ImageNameEditor } from "./ImageNameEditor.jsx";
 
-export function ImageDetails() {
+export function ImageDetails({ authToken }) {
   const { imageId } = useParams();
 
   const [image, setImage] = useState(null);
@@ -12,23 +12,30 @@ export function ImageDetails() {
   useEffect(() => {
     async function doFetch() {
       try {
-        const res = await fetch(`/api/images/${imageId}`);
+        const res = await fetch(`/api/images/${imageId}`, {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        });
 
         if (!res.ok) {
+          if (res.status === 403) {
+            throw new Error("Not authorized.");
+          }
           throw new Error("Failed to fetch image");
         }
 
         const data = await res.json();
         setImage(data);
       } catch (err) {
-        setError(err.message);
+        setError(err instanceof Error ? err.message : "Something went wrong.");
       } finally {
         setLoading(false);
       }
     }
 
     doFetch();
-  }, [imageId]);
+  }, [imageId, authToken]);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
@@ -42,10 +49,11 @@ export function ImageDetails() {
       <ImageNameEditor
         imageId={image._id}
         initialValue={image.name}
-        onRename={(newName) => setImage({ ...image, name: newName })}
+        authToken={authToken}
+        onRename={(newName) => setImage((prev) => ({ ...prev, name: newName }))}
       />
 
-      <img src={image.src} alt={image.name} />
+      <img className="ImageDetails-img" src={image.src} alt={image.name} />
     </>
   );
 }

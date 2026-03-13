@@ -1,0 +1,60 @@
+### create user
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "username": "chunkylover23",
+  "email": "alice@example.com",
+  "password": "password"
+}
+
+### login
+POST http://localhost:3000/api/auth/tokens
+Content-Type: application/json
+
+{
+  "username": "chunkylover23",
+  "password": "password"
+}
+
+### get images
+GET http://localhost:3000/api/images
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImNodW5reWxvdmVyMjMiLCJpYXQiOjE3NzMzNTc5NjksImV4cCI6MTc3MzQ0NDM2OX0.HnGL0VFBGI9DPThVYLdGcVqfFgxAvDGL1okBp5n-E0I
+
+### get one
+GET http://localhost:3000/api/images/69ab49023fc4a574c4de9d14
+Authorization: Bearer TOKEN_HERE
+
+### rename success
+PATCH http://localhost:3000/api/images/69ab49023fc4a574c4de9d14
+Authorization: Bearer TOKEN_HERE
+Content-Type: application/json
+
+{
+  "name": "Cool Dog Photo"
+}
+
+### rename bad request
+PATCH http://localhost:3000/api/images/69ab49023fc4a574c4de9d14
+Authorization: Bearer TOKEN_HERE
+Content-Type: application/json
+
+{}
+
+### rename too long
+PATCH http://localhost:3000/api/images/69ab49023fc4a574c4de9d14
+Authorization: Bearer TOKEN_HERE
+Content-Type: application/json
+
+{
+  "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}
+
+### rename not exist
+PATCH http://localhost:3000/api/images/123456789012345678901234
+Authorization: Bearer TOKEN_HERE
+Content-Type: application/json
+
+{
+  "name": "Does not exist"
+}
